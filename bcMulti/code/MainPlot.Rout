@@ -1,0 +1,381 @@
+
+R version 3.2.0 (2015-04-16) -- "Full of Ingredients"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> 
+>   
+>   #Clean memory
+>   rm(list=ls())
+>   
+>   library(stringr)
+>   library(logging)
+>   library(ggplot2)
+>   library(Hmisc)
+Loading required package: grid
+Loading required package: lattice
+Loading required package: survival
+Loading required package: Formula
+
+Attaching package: ‘Hmisc’
+
+The following objects are masked from ‘package:base’:
+
+    format.pval, round.POSIXt, trunc.POSIXt, units
+
+>   library(reshape)
+>   #Importing sources
+>   library(yaml)
+>   
+>   args=(commandArgs(T))
+>   config.file <- "config.yml"
+>   if (length(args) == 0) {
++     print("No arguments supplied. We use config.yml as default config file")
++   } else {
++     config.file <- args[[1]]
++     print(paste("Config file:",config.file))
++   }
+[1] "Config file: ~/projects/calibrations/proj1Paper/Gmetrx32/ldndc/config.yml"
+>   
+>   config <- yaml.load_file(config.file)
+>     
+>   projects.common <- config$path$projectsCommon
+>   #Importing sources
+>   source(file.path(projects.common,'Logging.R'))
+>   Logging(logPath=config$log$path,
++           logFile=config$log$file,
++           logLevel=config$log$level)$ini()  
+[1] "~/projects/calibrations/proj1Paper/Gmetrx32/ldndc"
+[1] "bcMulti.log"
+[1] "ERROR"
+[1] "basic.stdout" "writeToFile" 
+>   
+>   source('ModelUtils.R')
+Warning message:
+In .checkFieldsInMethod(def, fieldNames, allMethods) :
+  non-local assignment to non-field names (possibly misspelled?)
+    name <<- basename(x)
+( in method "searchProjectFile" for class "modelUtils")
+>   source('Database.R')
+Loading required package: RSQLite
+Loading required package: DBI
+>   source('PlotTool.R')
+>   source('OutputDB.R')
+>   
+>   db <- Database()
+2017-01-03 17:11:07.065 INFO::Initialize Database
+>   db$connect()
+2017-01-03 17:11:07.067 DEBUG::METHOD IN: Database$connect
+2017-01-03 17:11:07.152 DEBUG::METHOD OUT: Database$connect
+>   
+> 
+>   # Initialize the prior information for the parameters
+>   logdebug("initializePrior")
+2017-01-03 17:11:07.156 DEBUG::initializePrior
+>   folder <- config$path$common
+>   file <- config$params$prior
+>   priorProbabilityDistribution <- read.table(file.path(folder,file), header=T)
+>   
+>   plots <- PlotTool(prior=priorProbabilityDistribution)
+2017-01-03 17:11:07.238 DEBUG::Initialize PlotTool
+>   
+>  
+>   tryCatch({
++    # plots$plotParametersMultiBoxPlot()
++   }, error = function(e) { 
++     logerror(paste("plotParametersMultiBoxPlot",e))
++   })
+NULL
+> 
+>   tryCatch({
++    # plots$plotParametersViolin()
++   }, error = function(e) { 
++     logerror(paste("plotParametersViolin",e))
++   })
+NULL
+>   
+>   
+>   tryCatch({
++   #  plots$plotParametersBoxPlot()
++   }, error = function(e) { 
++     logerror(paste("plotParametersBoxPlot",e))
++   })
+NULL
+>   
+>   tryCatch({
++    # plots$plotAcceptedParametersSampleSpace()
++   }, error = function(e) { 
++     logerror(paste("plotAcceptedParametersSampleSpace",e))
++   })
+NULL
+>   
+>   tryCatch({
++ #    plots$plotFinalParametersHistogram()
++   }, error = function(e) { 
++     logerror(paste("plotFinalParametersHistogram",e))
++   })
+NULL
+>   
+>   tryCatch({
++     #plots$plotSampledParametersHistogram()
++   }, error = function(e) { 
++     logerror(paste("plotSubsetParametersHistogram",e))
++   })
+NULL
+>   
+>   tryCatch({
++     #plots$plotSubsetParametersHistogram()
++   }, error = function(e) { 
++     logerror(paste("plotSubsetParametersHistogram",e))
++   })
+NULL
+>   
+>    tryCatch({
++ 	Q50.lik <- round(as.numeric(db$selectQLikelihood(0.5)),2)
++     Q75.lik <- round(as.numeric(db$selectQLikelihood(0.75)),2)
++     Q95.lik <- round(as.numeric(db$selectQLikelihood(0.95)),2)
++     
++ 	plots$plotFinalParametersHistogram(lik=Q50.lik)
++     plots$plotFinalParametersHistogram(lik=Q75.lik) 
++ 	plots$plotFinalParametersHistogram(lik=Q95.lik) 
++ 
++     
++   }, error = function(e) { 
++     logerror(paste("plotFinalParametersHistogram Lik",e))
++   })
+2017-01-03 17:11:09.326 DEBUG::METHOD IN: plotTool$plotFinalParametersHistogram
+2017-01-03 17:11:09.327 DEBUG::METHOD IN: database$getParametersNames
+2017-01-03 17:11:09.327 DEBUG::METHOD IN: database$tableColumns
+2017-01-03 17:11:09.379 DEBUG::METHOD OUT: database$tableColumns
+2017-01-03 17:11:09.380 DEBUG::METHOD OUT: database$getParametersNames
+2017-01-03 17:11:09.382 DEBUG::METHOD IN: database$getChainIds
+2017-01-03 17:11:09.561 DEBUG::METHOD OUT: database$getChainIds
+2017-01-03 17:11:09.561 DEBUG::METHOD IN: database$getMinAcceptedIteration
+2017-01-03 17:11:09.644 DEBUG::METHOD OUT: database$getMinAcceptedIteration
+2017-01-03 17:11:09.645 DEBUG::METHOD IN: database$getMaxAcceptedIteration
+2017-01-03 17:11:09.726 DEBUG::METHOD OUT: database$getMaxAcceptedIteration
+2017-01-03 17:11:09.727 DEBUG::METHOD IN: plotTool$plotParametersHistogram
+2017-01-03 17:11:09.727 DEBUG::METHOD IN: plotTool$mkdir
+2017-01-03 17:11:09.731 DEBUG::METHOD OUT: plotTool$mkdir
+2017-01-03 17:11:09.732 DEBUG::METHOD IN: database$getParameters
+2017-01-03 17:11:09.732 DEBUG::METHOD IN: database$getParametersNames
+2017-01-03 17:11:09.733 DEBUG::METHOD IN: database$tableColumns
+2017-01-03 17:11:09.734 DEBUG::METHOD OUT: database$tableColumns
+2017-01-03 17:11:09.734 DEBUG::METHOD OUT: database$getParametersNames
+2017-01-03 17:11:09.736 DEBUG::SELECT iteration, siteparameterMETRX_AMAXvalue, siteparameterMETRX_BIOSYNTH_EFFvalue, siteparameterMETRX_CN_MIC_MAXvalue, siteparameterMETRX_CN_MIC_MINvalue, siteparameterMETRX_CO2_PROD_DECOMPvalue, siteparameterMETRX_D_EFF_REDUCTIONvalue, siteparameterMETRX_F_CHEMODENIT_PH_ONEILL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_2value, siteparameterMETRX_F_DECOMP_T_EXP_1value, siteparameterMETRX_F_DECOMP_T_EXP_2value, siteparameterMETRX_F_DECOMP_CLAY_2value, siteparameterMETRX_F_DENIT_N2value, siteparameterMETRX_F_DENIT_NOvalue, siteparameterMETRX_F_NIT_NO_M_EXP_1value, siteparameterMETRX_F_NIT_NO_M_EXP_2value, siteparameterMETRX_F_NIT_NO_T_EXP_1value, siteparameterMETRX_F_NIT_NO_T_EXP_2value, siteparameterMETRX_F_NIT_NO_PH_LIN_1value, siteparameterMETRX_F_NIT_N2O_T_EXP_1value, siteparameterMETRX_F_NIT_PH_ONEILL_1value, siteparameterMETRX_F_NIT_PH_ONEILL_2value, siteparameterMETRX_F_NIT_PH_ONEILL_3value, siteparameterMETRX_MIC_EFFvalue, siteparameterMETRX_MUEMAX_C_DENITvalue, siteparameterMETRX_MUEMAX_C_FERMvalue, siteparameterMETRX_MUEMAX_C_NITvalue, siteparameterMETRX_KF_NIT_NOvalue, siteparameterMETRX_KF_NIT_N2Ovalue, siteparameterMETRX_KMM_C_DENITvalue, siteparameterMETRX_KMM_C_MICvalue, siteparameterMETRX_KMM_N_DENITvalue, siteparameterMETRX_KMM_N_MICvalue, siteparameterMETRX_KR_DC_HUM_0value, siteparameterMETRX_KR_DC_HUM_1value, siteparameterMETRX_KR_DC_HUM_2value, siteparameterMETRX_KR_HU_AORG_HUM_0value, siteparameterMETRX_KR_HU_DOCvalue, fertilizer, bd, ph, clay, corg, wcmax FROM Parameters WHERE likelihood > -100 AND chain IN (0.33) AND iteration <= 64443
+2017-01-03 17:11:09.823 DEBUG::METHOD OUT: database$getParameters
+2017-01-03 17:11:09.824 DEBUG::METHOD IN: database$getParameters
+2017-01-03 17:11:09.824 DEBUG::METHOD IN: database$getParametersNames
+2017-01-03 17:11:09.825 DEBUG::METHOD IN: database$tableColumns
+2017-01-03 17:11:09.826 DEBUG::METHOD OUT: database$tableColumns
+2017-01-03 17:11:09.826 DEBUG::METHOD OUT: database$getParametersNames
+2017-01-03 17:11:09.828 DEBUG::SELECT iteration, siteparameterMETRX_AMAXvalue, siteparameterMETRX_BIOSYNTH_EFFvalue, siteparameterMETRX_CN_MIC_MAXvalue, siteparameterMETRX_CN_MIC_MINvalue, siteparameterMETRX_CO2_PROD_DECOMPvalue, siteparameterMETRX_D_EFF_REDUCTIONvalue, siteparameterMETRX_F_CHEMODENIT_PH_ONEILL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_2value, siteparameterMETRX_F_DECOMP_T_EXP_1value, siteparameterMETRX_F_DECOMP_T_EXP_2value, siteparameterMETRX_F_DECOMP_CLAY_2value, siteparameterMETRX_F_DENIT_N2value, siteparameterMETRX_F_DENIT_NOvalue, siteparameterMETRX_F_NIT_NO_M_EXP_1value, siteparameterMETRX_F_NIT_NO_M_EXP_2value, siteparameterMETRX_F_NIT_NO_T_EXP_1value, siteparameterMETRX_F_NIT_NO_T_EXP_2value, siteparameterMETRX_F_NIT_NO_PH_LIN_1value, siteparameterMETRX_F_NIT_N2O_T_EXP_1value, siteparameterMETRX_F_NIT_PH_ONEILL_1value, siteparameterMETRX_F_NIT_PH_ONEILL_2value, siteparameterMETRX_F_NIT_PH_ONEILL_3value, siteparameterMETRX_MIC_EFFvalue, siteparameterMETRX_MUEMAX_C_DENITvalue, siteparameterMETRX_MUEMAX_C_FERMvalue, siteparameterMETRX_MUEMAX_C_NITvalue, siteparameterMETRX_KF_NIT_NOvalue, siteparameterMETRX_KF_NIT_N2Ovalue, siteparameterMETRX_KMM_C_DENITvalue, siteparameterMETRX_KMM_C_MICvalue, siteparameterMETRX_KMM_N_DENITvalue, siteparameterMETRX_KMM_N_MICvalue, siteparameterMETRX_KR_DC_HUM_0value, siteparameterMETRX_KR_DC_HUM_1value, siteparameterMETRX_KR_DC_HUM_2value, siteparameterMETRX_KR_HU_AORG_HUM_0value, siteparameterMETRX_KR_HU_DOCvalue, fertilizer, bd, ph, clay, corg, wcmax FROM Parameters WHERE likelihood > -100 AND chain IN (1) AND iteration <= 64443
+2017-01-03 17:11:10.531 DEBUG::METHOD OUT: database$getParameters
+2017-01-03 17:11:10.531 DEBUG::METHOD IN: database$getParameters
+2017-01-03 17:11:10.532 DEBUG::METHOD IN: database$getParametersNames
+2017-01-03 17:11:10.532 DEBUG::METHOD IN: database$tableColumns
+2017-01-03 17:11:10.533 DEBUG::METHOD OUT: database$tableColumns
+2017-01-03 17:11:10.534 DEBUG::METHOD OUT: database$getParametersNames
+2017-01-03 17:11:10.535 DEBUG::SELECT iteration, siteparameterMETRX_AMAXvalue, siteparameterMETRX_BIOSYNTH_EFFvalue, siteparameterMETRX_CN_MIC_MAXvalue, siteparameterMETRX_CN_MIC_MINvalue, siteparameterMETRX_CO2_PROD_DECOMPvalue, siteparameterMETRX_D_EFF_REDUCTIONvalue, siteparameterMETRX_F_CHEMODENIT_PH_ONEILL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_2value, siteparameterMETRX_F_DECOMP_T_EXP_1value, siteparameterMETRX_F_DECOMP_T_EXP_2value, siteparameterMETRX_F_DECOMP_CLAY_2value, siteparameterMETRX_F_DENIT_N2value, siteparameterMETRX_F_DENIT_NOvalue, siteparameterMETRX_F_NIT_NO_M_EXP_1value, siteparameterMETRX_F_NIT_NO_M_EXP_2value, siteparameterMETRX_F_NIT_NO_T_EXP_1value, siteparameterMETRX_F_NIT_NO_T_EXP_2value, siteparameterMETRX_F_NIT_NO_PH_LIN_1value, siteparameterMETRX_F_NIT_N2O_T_EXP_1value, siteparameterMETRX_F_NIT_PH_ONEILL_1value, siteparameterMETRX_F_NIT_PH_ONEILL_2value, siteparameterMETRX_F_NIT_PH_ONEILL_3value, siteparameterMETRX_MIC_EFFvalue, siteparameterMETRX_MUEMAX_C_DENITvalue, siteparameterMETRX_MUEMAX_C_FERMvalue, siteparameterMETRX_MUEMAX_C_NITvalue, siteparameterMETRX_KF_NIT_NOvalue, siteparameterMETRX_KF_NIT_N2Ovalue, siteparameterMETRX_KMM_C_DENITvalue, siteparameterMETRX_KMM_C_MICvalue, siteparameterMETRX_KMM_N_DENITvalue, siteparameterMETRX_KMM_N_MICvalue, siteparameterMETRX_KR_DC_HUM_0value, siteparameterMETRX_KR_DC_HUM_1value, siteparameterMETRX_KR_DC_HUM_2value, siteparameterMETRX_KR_HU_AORG_HUM_0value, siteparameterMETRX_KR_HU_DOCvalue, fertilizer, bd, ph, clay, corg, wcmax FROM Parameters WHERE likelihood > -100 AND chain IN (2) AND iteration <= 64443
+2017-01-03 17:11:11.227 DEBUG::METHOD OUT: database$getParameters
+2017-01-03 17:11:11.227 DEBUG::METHOD IN: database$selectParametersBestLikelihood
+2017-01-03 17:11:11.228 DEBUG::METHOD IN: database$getParametersNames
+2017-01-03 17:11:11.228 DEBUG::METHOD IN: database$tableColumns
+2017-01-03 17:11:11.229 DEBUG::METHOD OUT: database$tableColumns
+2017-01-03 17:11:11.230 DEBUG::METHOD OUT: database$getParametersNames
+2017-01-03 17:11:11.231 DEBUG::SELECT iteration,siteparameterMETRX_AMAXvalue, siteparameterMETRX_BIOSYNTH_EFFvalue, siteparameterMETRX_CN_MIC_MAXvalue, siteparameterMETRX_CN_MIC_MINvalue, siteparameterMETRX_CO2_PROD_DECOMPvalue, siteparameterMETRX_D_EFF_REDUCTIONvalue, siteparameterMETRX_F_CHEMODENIT_PH_ONEILL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_2value, siteparameterMETRX_F_DECOMP_T_EXP_1value, siteparameterMETRX_F_DECOMP_T_EXP_2value, siteparameterMETRX_F_DECOMP_CLAY_2value, siteparameterMETRX_F_DENIT_N2value, siteparameterMETRX_F_DENIT_NOvalue, siteparameterMETRX_F_NIT_NO_M_EXP_1value, siteparameterMETRX_F_NIT_NO_M_EXP_2value, siteparameterMETRX_F_NIT_NO_T_EXP_1value, siteparameterMETRX_F_NIT_NO_T_EXP_2value, siteparameterMETRX_F_NIT_NO_PH_LIN_1value, siteparameterMETRX_F_NIT_N2O_T_EXP_1value, siteparameterMETRX_F_NIT_PH_ONEILL_1value, siteparameterMETRX_F_NIT_PH_ONEILL_2value, siteparameterMETRX_F_NIT_PH_ONEILL_3value, siteparameterMETRX_MIC_EFFvalue, siteparameterMETRX_MUEMAX_C_DENITvalue, siteparameterMETRX_MUEMAX_C_FERMvalue, siteparameterMETRX_MUEMAX_C_NITvalue, siteparameterMETRX_KF_NIT_NOvalue, siteparameterMETRX_KF_NIT_N2Ovalue, siteparameterMETRX_KMM_C_DENITvalue, siteparameterMETRX_KMM_C_MICvalue, siteparameterMETRX_KMM_N_DENITvalue, siteparameterMETRX_KMM_N_MICvalue, siteparameterMETRX_KR_DC_HUM_0value, siteparameterMETRX_KR_DC_HUM_1value, siteparameterMETRX_KR_DC_HUM_2value, siteparameterMETRX_KR_HU_AORG_HUM_0value, siteparameterMETRX_KR_HU_DOCvalue, fertilizer, bd, ph, clay, corg, wcmax FROM (SELECT * FROM Parameters WHERE likelihood <> 0 AND chain = 1) GROUP BY chain HAVING likelihood = MAX(likelihood) ORDER BY likelihood DESC
+2017-01-03 17:11:11.437 DEBUG::METHOD OUT: database$selectParametersBestLikelihood
+2017-01-03 17:11:11.438 DEBUG::METHOD IN: database$selectParametersBestLikelihood
+2017-01-03 17:11:11.439 DEBUG::METHOD IN: database$getParametersNames
+2017-01-03 17:11:11.439 DEBUG::METHOD IN: database$tableColumns
+2017-01-03 17:11:11.441 DEBUG::METHOD OUT: database$tableColumns
+2017-01-03 17:11:11.442 DEBUG::METHOD OUT: database$getParametersNames
+2017-01-03 17:11:11.443 DEBUG::SELECT iteration,siteparameterMETRX_AMAXvalue, siteparameterMETRX_BIOSYNTH_EFFvalue, siteparameterMETRX_CN_MIC_MAXvalue, siteparameterMETRX_CN_MIC_MINvalue, siteparameterMETRX_CO2_PROD_DECOMPvalue, siteparameterMETRX_D_EFF_REDUCTIONvalue, siteparameterMETRX_F_CHEMODENIT_PH_ONEILL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_2value, siteparameterMETRX_F_DECOMP_T_EXP_1value, siteparameterMETRX_F_DECOMP_T_EXP_2value, siteparameterMETRX_F_DECOMP_CLAY_2value, siteparameterMETRX_F_DENIT_N2value, siteparameterMETRX_F_DENIT_NOvalue, siteparameterMETRX_F_NIT_NO_M_EXP_1value, siteparameterMETRX_F_NIT_NO_M_EXP_2value, siteparameterMETRX_F_NIT_NO_T_EXP_1value, siteparameterMETRX_F_NIT_NO_T_EXP_2value, siteparameterMETRX_F_NIT_NO_PH_LIN_1value, siteparameterMETRX_F_NIT_N2O_T_EXP_1value, siteparameterMETRX_F_NIT_PH_ONEILL_1value, siteparameterMETRX_F_NIT_PH_ONEILL_2value, siteparameterMETRX_F_NIT_PH_ONEILL_3value, siteparameterMETRX_MIC_EFFvalue, siteparameterMETRX_MUEMAX_C_DENITvalue, siteparameterMETRX_MUEMAX_C_FERMvalue, siteparameterMETRX_MUEMAX_C_NITvalue, siteparameterMETRX_KF_NIT_NOvalue, siteparameterMETRX_KF_NIT_N2Ovalue, siteparameterMETRX_KMM_C_DENITvalue, siteparameterMETRX_KMM_C_MICvalue, siteparameterMETRX_KMM_N_DENITvalue, siteparameterMETRX_KMM_N_MICvalue, siteparameterMETRX_KR_DC_HUM_0value, siteparameterMETRX_KR_DC_HUM_1value, siteparameterMETRX_KR_DC_HUM_2value, siteparameterMETRX_KR_HU_AORG_HUM_0value, siteparameterMETRX_KR_HU_DOCvalue, fertilizer, bd, ph, clay, corg, wcmax FROM (SELECT * FROM Parameters WHERE likelihood <> 0 AND chain = 2) GROUP BY chain HAVING likelihood = MAX(likelihood) ORDER BY likelihood DESC
+2017-01-03 17:11:11.581 DEBUG::METHOD OUT: database$selectParametersBestLikelihood
+2017-01-03 17:11:11.582 DEBUG::METHOD IN: database$selectParametersBestLikelihood
+2017-01-03 17:11:11.582 DEBUG::METHOD IN: database$getParametersNames
+2017-01-03 17:11:11.582 DEBUG::METHOD IN: database$tableColumns
+2017-01-03 17:11:11.584 DEBUG::METHOD OUT: database$tableColumns
+2017-01-03 17:11:11.584 DEBUG::METHOD OUT: database$getParametersNames
+2017-01-03 17:11:11.586 DEBUG::SELECT iteration,siteparameterMETRX_AMAXvalue, siteparameterMETRX_BIOSYNTH_EFFvalue, siteparameterMETRX_CN_MIC_MAXvalue, siteparameterMETRX_CN_MIC_MINvalue, siteparameterMETRX_CO2_PROD_DECOMPvalue, siteparameterMETRX_D_EFF_REDUCTIONvalue, siteparameterMETRX_F_CHEMODENIT_PH_ONEILL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_2value, siteparameterMETRX_F_DECOMP_T_EXP_1value, siteparameterMETRX_F_DECOMP_T_EXP_2value, siteparameterMETRX_F_DECOMP_CLAY_2value, siteparameterMETRX_F_DENIT_N2value, siteparameterMETRX_F_DENIT_NOvalue, siteparameterMETRX_F_NIT_NO_M_EXP_1value, siteparameterMETRX_F_NIT_NO_M_EXP_2value, siteparameterMETRX_F_NIT_NO_T_EXP_1value, siteparameterMETRX_F_NIT_NO_T_EXP_2value, siteparameterMETRX_F_NIT_NO_PH_LIN_1value, siteparameterMETRX_F_NIT_N2O_T_EXP_1value, siteparameterMETRX_F_NIT_PH_ONEILL_1value, siteparameterMETRX_F_NIT_PH_ONEILL_2value, siteparameterMETRX_F_NIT_PH_ONEILL_3value, siteparameterMETRX_MIC_EFFvalue, siteparameterMETRX_MUEMAX_C_DENITvalue, siteparameterMETRX_MUEMAX_C_FERMvalue, siteparameterMETRX_MUEMAX_C_NITvalue, siteparameterMETRX_KF_NIT_NOvalue, siteparameterMETRX_KF_NIT_N2Ovalue, siteparameterMETRX_KMM_C_DENITvalue, siteparameterMETRX_KMM_C_MICvalue, siteparameterMETRX_KMM_N_DENITvalue, siteparameterMETRX_KMM_N_MICvalue, siteparameterMETRX_KR_DC_HUM_0value, siteparameterMETRX_KR_DC_HUM_1value, siteparameterMETRX_KR_DC_HUM_2value, siteparameterMETRX_KR_HU_AORG_HUM_0value, siteparameterMETRX_KR_HU_DOCvalue, fertilizer, bd, ph, clay, corg, wcmax FROM (SELECT * FROM Parameters WHERE likelihood <> 0 AND chain = 3) GROUP BY chain HAVING likelihood = MAX(likelihood) ORDER BY likelihood DESC
+2017-01-03 17:11:11.710 DEBUG::METHOD OUT: database$selectParametersBestLikelihood
+2017-01-03 17:11:11.710 DEBUG::METHOD IN: database$selectParametersBestLikelihood
+2017-01-03 17:11:11.711 DEBUG::METHOD IN: database$getParametersNames
+2017-01-03 17:11:11.711 DEBUG::METHOD IN: database$tableColumns
+2017-01-03 17:11:11.713 DEBUG::METHOD OUT: database$tableColumns
+2017-01-03 17:11:11.713 DEBUG::METHOD OUT: database$getParametersNames
+2017-01-03 17:11:11.791 DEBUG::SELECT iteration,siteparameterMETRX_AMAXvalue, siteparameterMETRX_BIOSYNTH_EFFvalue, siteparameterMETRX_CN_MIC_MAXvalue, siteparameterMETRX_CN_MIC_MINvalue, siteparameterMETRX_CO2_PROD_DECOMPvalue, siteparameterMETRX_D_EFF_REDUCTIONvalue, siteparameterMETRX_F_CHEMODENIT_PH_ONEILL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_1value, siteparameterMETRX_F_DECOMP_M_WEIBULL_2value, siteparameterMETRX_F_DECOMP_T_EXP_1value, siteparameterMETRX_F_DECOMP_T_EXP_2value, siteparameterMETRX_F_DECOMP_CLAY_2value, siteparameterMETRX_F_DENIT_N2value, siteparameterMETRX_F_DENIT_NOvalue, siteparameterMETRX_F_NIT_NO_M_EXP_1value, siteparameterMETRX_F_NIT_NO_M_EXP_2value, siteparameterMETRX_F_NIT_NO_T_EXP_1value, siteparameterMETRX_F_NIT_NO_T_EXP_2value, siteparameterMETRX_F_NIT_NO_PH_LIN_1value, siteparameterMETRX_F_NIT_N2O_T_EXP_1value, siteparameterMETRX_F_NIT_PH_ONEILL_1value, siteparameterMETRX_F_NIT_PH_ONEILL_2value, siteparameterMETRX_F_NIT_PH_ONEILL_3value, siteparameterMETRX_MIC_EFFvalue, siteparameterMETRX_MUEMAX_C_DENITvalue, siteparameterMETRX_MUEMAX_C_FERMvalue, siteparameterMETRX_MUEMAX_C_NITvalue, siteparameterMETRX_KF_NIT_NOvalue, siteparameterMETRX_KF_NIT_N2Ovalue, siteparameterMETRX_KMM_C_DENITvalue, siteparameterMETRX_KMM_C_MICvalue, siteparameterMETRX_KMM_N_DENITvalue, siteparameterMETRX_KMM_N_MICvalue, siteparameterMETRX_KR_DC_HUM_0value, siteparameterMETRX_KR_DC_HUM_1value, siteparameterMETRX_KR_DC_HUM_2value, siteparameterMETRX_KR_HU_AORG_HUM_0value, siteparameterMETRX_KR_HU_DOCvalue, fertilizer, bd, ph, clay, corg, wcmax FROM (SELECT * FROM Parameters WHERE likelihood <> 0 AND chain = 4) GROUP BY chain HAVING likelihood = MAX(likelihood) ORDER BY likelihood DESC
+2017-01-03 17:11:11.910 DEBUG::METHOD OUT: database$selectParametersBestLikelihood
+2017-01-03 17:11:12.038 DEBUG::METHOD IN: plotTool$getHighestDensityInterval
+2017-01-03 17:11:12.046 ERROR::plotFinalParametersHistogram Lik Error in density.default(values): need at least 2 points to select a bandwidth automatically
+>   
+>   tryCatch({
++   #  plots$plotParametersLevelPlotCorrelation()
++   }, error = function(e) { 
++     logerror(paste("plotParametersLevelPlotCorrelation",e))
++   })
+NULL
+>   
+> 
+>   
+>   tryCatch({
++   #  plots$plotBestParameterLines()
++   }, error = function(e) { 
++     logerror(paste("plotParametersLevelPlotCorrelation",e))
++   })
+NULL
+> 
+>    
+>   tryCatch({
++     out.db <- OutputDB()
++    # out.db$connect()
++    # avg.lik <- round(as.numeric(out.db$selectMeanLikelihood()),2)
++   #  Q75.lik <- round(as.numeric(db$selectQLikelihood(0.75)),2)
++   #  Q95.lik <- round(as.numeric(db$selectQLikelihood(0.95)),2)
++     
++ 
++ #   plots$plotOutputDBUncertainties(out.db,filter=paste0(avg.lik,""),title="AVG")
++ #   plots$plotOutputDBUncertainties(out.db,filter=paste0(Q75.lik,""),title="Q75")
++ #   plots$plotOutputDBUncertainties(out.db,filter=paste0(Q95.lik,""),title="Q95")
++ #   plots$plotOutputDBUncertainties(out.db,filter="0",title="ALL")
++ 
++   #  out.db$close()
++     
++   }, error = function(e) { 
++     logerror(paste("plotOutputDBUncertainties",e))
++   })
+2017-01-03 17:11:12.092 INFO::Initialize Output Database
+> 
+>  
+>   tryCatch({
++     out.db <- OutputDB()
++     out.db$connect()
++     plots$plotOutputDB(out.db)
++     out.db$close()
++     
++   }, error = function(e) { 
++     logerror(paste("plotOutputDB",e))
++   })
+2017-01-03 17:11:12.096 INFO::Initialize Output Database
+2017-01-03 17:11:12.097 DEBUG::METHOD IN: OutputDB$connect
+2017-01-03 17:11:12.170 DEBUG::METHOD OUT: OutputDB$connect
+2017-01-03 17:11:12.171 DEBUG::METHOD IN: plotTool$plotOutputDB
+2017-01-03 17:11:12.172 DEBUG::METHOD IN: plotTool$mkdir
+2017-01-03 17:11:12.173 DEBUG::METHOD OUT: plotTool$mkdir
+2017-01-03 17:11:12.174 DEBUG::METHOD IN: outputDB$selectBestOutput
+2017-01-03 17:11:19.223 DEBUG::METHOD OUT: outputDB$selectBestOutput
+2017-01-03 17:11:19.225 DEBUG::METHOD IN: database$getCompoundsName
+2017-01-03 17:11:19.226 DEBUG::SELECT compound FROM Measurements GROUP BY compound
+2017-01-03 17:11:19.273 DEBUG::METHOD OUT: database$getCompoundsName
+2017-01-03 17:11:19.276 ERROR::[1] "n_n2o" "n_no"
+2017-01-03 17:11:19.287 ERROR::compound n_n2o
+2017-01-03 17:11:19.288 ERROR::site grignon
+2017-01-03 17:11:19.288 DEBUG::METHOD IN: database$getMesaurements
+2017-01-03 17:11:19.289 DEBUG::METHOD IN: database$getSiteId
+2017-01-03 17:11:19.291 DEBUG::METHOD OUT: database$getSiteId
+2017-01-03 17:11:19.292 DEBUG::SELECT * FROM Measurements WHERE site IN ('756') AND compound IN ('n_n2o') ORDER BY compound, year, day ASC
+2017-01-03 17:11:19.298 DEBUG::METHOD OUT: database$getMesaurements
+2017-01-03 17:11:19.305 ERROR::site compound year day        value           sd       date
+ 2017-01-03 17:11:19.305 ERROR::1  756    n_n2o 2005 133 0.0007751981 0.0004007981 2005-05-13
+ 2017-01-03 17:11:19.305 ERROR::2  756    n_n2o 2005 134 0.0027144000 0.0018672019 2005-05-14
+ 2017-01-03 17:11:19.305 ERROR::3  756    n_n2o 2005 135 0.0063551981 0.0041159981 2005-05-15
+ 2017-01-03 17:11:19.305 ERROR::4  756    n_n2o 2005 136 0.0048096000 0.0037872000 2005-05-16
+ 2017-01-03 17:11:19.305 ERROR::5  756    n_n2o 2005 137 0.0026111981 0.0028968019 2005-05-17
+ 2017-01-03 17:11:19.305 ERROR::6  756    n_n2o 2005 138 0.0026831981 0.0018960019 2005-05-18
+2017-01-03 17:11:19.316 ERROR::chain    site likelihood year julianday dNn2oemiskgNha1 dNnoemiskgNha1
+ 2017-01-03 17:11:19.316 ERROR::1     2 grignon  0.7012717 2004       366      0.00174587    0.000406708
+ 2017-01-03 17:11:19.316 ERROR::2     2 grignon  0.7012717 2005         1      0.00184613    0.000424792
+ 2017-01-03 17:11:19.316 ERROR::3     2 grignon  0.7012717 2005         2      0.00181647    0.000417388
+ 2017-01-03 17:11:19.316 ERROR::4     2 grignon  0.7012717 2005         3      0.00184743    0.000420759
+ 2017-01-03 17:11:19.316 ERROR::5     2 grignon  0.7012717 2005         4      0.00185634    0.000420094
+ 2017-01-03 17:11:19.316 ERROR::6     2 grignon  0.7012717 2005         5      0.00192745    0.000432346
+ 2017-01-03 17:11:19.316 ERROR::date
+ 2017-01-03 17:11:19.316 ERROR::1 2004-12-31
+ 2017-01-03 17:11:19.316 ERROR::2 2005-01-01
+ 2017-01-03 17:11:19.316 ERROR::3 2005-01-02
+ 2017-01-03 17:11:19.316 ERROR::4 2005-01-03
+ 2017-01-03 17:11:19.316 ERROR::5 2005-01-04
+ 2017-01-03 17:11:19.316 ERROR::6 2005-01-05
+2017-01-03 17:11:19.317 ERROR::compo n_n2o
+2017-01-03 17:11:19.318 ERROR::dN_n2o_emis.kgNha.1.
+2017-01-03 17:11:19.318 ERROR::character
+2017-01-03 17:11:19.468 ERROR::dNn2oemiskgNha1
+2017-01-03 17:11:20.885 ERROR::compound n_no
+2017-01-03 17:11:20.920 ERROR::site grignon
+2017-01-03 17:11:20.921 DEBUG::METHOD IN: database$getMesaurements
+2017-01-03 17:11:20.922 DEBUG::METHOD IN: database$getSiteId
+2017-01-03 17:11:20.924 DEBUG::METHOD OUT: database$getSiteId
+2017-01-03 17:11:20.926 DEBUG::SELECT * FROM Measurements WHERE site IN ('756') AND compound IN ('n_no') ORDER BY compound, year, day ASC
+2017-01-03 17:11:20.947 DEBUG::METHOD OUT: database$getMesaurements
+2017-01-03 17:11:20.956 ERROR::site compound year day     value        sd       date
+ 2017-01-03 17:11:20.956 ERROR::1  756     n_no 2006 346 0.0013392 0.0009408 2006-12-12
+ 2017-01-03 17:11:20.956 ERROR::2  756     n_no 2006 347 0.0018624 0.0012192 2006-12-13
+ 2017-01-03 17:11:20.956 ERROR::3  756     n_no 2006 348 0.0014304 0.0012360 2006-12-14
+ 2017-01-03 17:11:20.956 ERROR::4  756     n_no 2006 349 0.0012240 0.0018840 2006-12-15
+ 2017-01-03 17:11:20.956 ERROR::5  756     n_no 2006 350 0.0008688 0.0009408 2006-12-16
+ 2017-01-03 17:11:20.956 ERROR::6  756     n_no 2006 351 0.0014064 0.0017184 2006-12-17
+2017-01-03 17:11:20.968 ERROR::chain    site likelihood year julianday dNn2oemiskgNha1 dNnoemiskgNha1
+ 2017-01-03 17:11:20.968 ERROR::1     2 grignon  0.7012717 2004       366      0.00174587    0.000406708
+ 2017-01-03 17:11:20.968 ERROR::2     2 grignon  0.7012717 2005         1      0.00184613    0.000424792
+ 2017-01-03 17:11:20.968 ERROR::3     2 grignon  0.7012717 2005         2      0.00181647    0.000417388
+ 2017-01-03 17:11:20.968 ERROR::4     2 grignon  0.7012717 2005         3      0.00184743    0.000420759
+ 2017-01-03 17:11:20.968 ERROR::5     2 grignon  0.7012717 2005         4      0.00185634    0.000420094
+ 2017-01-03 17:11:20.968 ERROR::6     2 grignon  0.7012717 2005         5      0.00192745    0.000432346
+ 2017-01-03 17:11:20.968 ERROR::date
+ 2017-01-03 17:11:20.968 ERROR::1 2004-12-31
+ 2017-01-03 17:11:20.968 ERROR::2 2005-01-01
+ 2017-01-03 17:11:20.968 ERROR::3 2005-01-02
+ 2017-01-03 17:11:20.968 ERROR::4 2005-01-03
+ 2017-01-03 17:11:20.968 ERROR::5 2005-01-04
+ 2017-01-03 17:11:20.968 ERROR::6 2005-01-05
+2017-01-03 17:11:20.969 ERROR::compo n_no
+2017-01-03 17:11:20.970 ERROR::dN_no_emis.kgNha.1.
+2017-01-03 17:11:20.970 ERROR::character
+2017-01-03 17:11:20.986 ERROR::dNnoemiskgNha1
+2017-01-03 17:11:21.882 DEBUG::METHOD OUT: plotTool$plotOutputDB
+[1] TRUE
+>   
+>   tryCatch({
++     out.db <- OutputDB()
++     out.db$connect()
++     #Trzing to identify parameters that reach some missing points and destroy the rest (I have to use likelihood as outputs do not have iteration value :S)
++     #Hmetrx peak: iterations <- out.db$selectIterationsWithLikelihoodDetails("n_n2o_2002_NMAEMeasPeaks", 0.1)
++  #   likelihoods <- out.db$selectIterationsWithLikelihoodDetails("n_n2o_2007_NMAEMeasPeaks", 0.01)
++  #   logerror(paste("FILTERED ITERATIONS:",length(unique(likelihoods))))
++  #   plots$plotOutputDBUncertaintiesByIterations(out.db,likelihoods,"n_n2o_2007_NMAEMeasPeaks")    
++     
++       
++     out.db$close()
++     
++   }, error = function(e) { 
++     logerror(paste("plotOutputDBUncertaintiesByIterations",e))
++   })
+2017-01-03 17:11:21.889 INFO::Initialize Output Database
+2017-01-03 17:11:21.890 DEBUG::METHOD IN: OutputDB$connect
+2017-01-03 17:11:21.928 DEBUG::METHOD OUT: OutputDB$connect
+[1] TRUE
+>   
+>  
+>   db$close()
+[1] TRUE
+> 
+> 
+> proc.time()
+   user  system elapsed 
+ 10.308   1.728  20.146 
